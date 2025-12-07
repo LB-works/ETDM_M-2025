@@ -32,22 +32,22 @@ function App() {
   }, [user]);
 
   return (
-    <Router>
+    <Router basename={import.meta.env.BASE_URL}>
       <div className="min-h-screen bg-background-light dark:bg-background-dark">
         <Routes>
-          <Route 
-            path="/login" 
+          <Route
+            path="/login"
             element={
               user ? (
-                userRole === 'provider' ? 
-                  <Navigate to="/fleet-overview" replace /> : 
+                userRole === 'provider' ?
+                  <Navigate to="/fleet-overview" replace /> :
                   <Navigate to="/dashboard" replace />
               ) : (
                 <Login setUser={setUser} setUserRole={setUserRole} />
               )
-            } 
+            }
           />
-          <Route 
+          <Route
             path="/signup"
             element={
               user ? (
@@ -57,18 +57,18 @@ function App() {
               )
             }
           />
-          <Route 
-            path="/dashboard" 
+          <Route
+            path="/dashboard"
             element={
               user ? (
                 <CustomerDashboard user={user} setUser={setUser} />
               ) : (
                 <Navigate to="/login" replace />
               )
-            } 
+            }
           />
-          <Route 
-            path="/usage" 
+          <Route
+            path="/usage"
             element={
               user ? (
                 <UsageHistory user={user} setUser={setUser} />
@@ -77,8 +77,8 @@ function App() {
               )
             }
           />
-          <Route 
-            path="/alerts" 
+          <Route
+            path="/alerts"
             element={
               user ? (
                 <AlertsNotifications user={user} setUser={setUser} />
@@ -87,8 +87,8 @@ function App() {
               )
             }
           />
-          <Route 
-            path="/account" 
+          <Route
+            path="/account"
             element={
               user ? (
                 <AccountSettings user={user} setUser={setUser} />
@@ -97,49 +97,49 @@ function App() {
               )
             }
           />
-          <Route 
-            path="/fleet-overview" 
+          <Route
+            path="/fleet-overview"
             element={
               user && userRole === 'provider' ? (
                 <FleetOverview user={user} setUser={setUser} />
               ) : (
                 <Navigate to="/login" replace />
               )
-            } 
+            }
           />
-          <Route 
-            path="/customers" 
+          <Route
+            path="/customers"
             element={
               user && userRole === 'provider' ? (
                 <CustomerManagement user={user} setUser={setUser} />
               ) : (
                 <Navigate to="/login" replace />
               )
-            } 
+            }
           />
-          <Route 
-            path="/analytics" 
+          <Route
+            path="/analytics"
             element={
               user && userRole === 'provider' ? (
                 <Analytics user={user} setUser={setUser} />
               ) : (
                 <Navigate to="/login" replace />
               )
-            } 
+            }
           />
-          <Route 
-            path="/reports" 
+          <Route
+            path="/reports"
             element={
               user && userRole === 'provider' ? (
                 <Reports user={user} setUser={setUser} />
               ) : (
                 <Navigate to="/login" replace />
               )
-            } 
+            }
           />
           <Route path="/" element={<Navigate to={user ? (userRole === 'provider' ? '/fleet-overview' : '/dashboard') : '/login'} replace />} />
         </Routes>
-        <Toaster 
+        <Toaster
           position="top-right"
           toastOptions={{
             duration: 4000,
