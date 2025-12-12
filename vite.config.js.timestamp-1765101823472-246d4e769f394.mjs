@@ -1,7 +1,6 @@
 // vite.config.js
-import { defineConfig } from "file:///C:/Users/Ledge/Documents/PlatformIO/Projects/Engr%20Simon%20project%20-%20Client%20copy/react-dashboard/node_modules/vite/dist/node/index.js";
-import react from "file:///C:/Users/Ledge/Documents/PlatformIO/Projects/Engr%20Simon%20project%20-%20Client%20copy/react-dashboard/node_modules/@vitejs/plugin-react/dist/index.js";
-var vite_config_default = defineConfig({
+import { defineConfig } from 
+
   plugins: [react()],
   base: "/ETDM_M-2025/"
   // Change to '/<REPO_NAME>/' for GitHub Pages project sites
