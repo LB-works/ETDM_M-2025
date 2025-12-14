@@ -28,3 +28,6 @@ yarn-error.log*
 *.swp
 *.swo
 
+
+# Vite temporary files
+vite.config.js.timestamp-*.mjs
