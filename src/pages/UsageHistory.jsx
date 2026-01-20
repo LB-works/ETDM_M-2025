@@ -7,6 +7,7 @@ import { ref, onValue, off, get, query, orderByKey, limitToLast } from 'firebase
 const UsageHistory = ({ user, setUser }) => {
   const [pairId, setPairId] = useState('');
   const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPair = async () => {
@@ -25,7 +26,7 @@ const UsageHistory = ({ user, setUser }) => {
     const histRef = ref(db, `meters/${pairId}/client/history`);
     const histQuery = query(histRef, orderByKey(), limitToLast(200));
     const unsub = onValue(histQuery, (snap) => {
-      if (!snap.exists()) { setRows([]); return; }
+      if (!snap.exists()) { setRows([]); setLoading(false); return; }
       const data = snap.val();
       
       // Filter to show only hourly data
@@ -51,6 +52,7 @@ const UsageHistory = ({ user, setUser }) => {
       // Take last 100 hourly entries and reverse
       const parsed = hourlyData.slice(-100).reverse();
       setRows(parsed);
+      setLoading(false);
     });
     return () => off(histRef);
   }, [pairId]);
@@ -118,7 +120,15 @@ const UsageHistory = ({ user, setUser }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.length === 0 ? (
+                  {loading ? (
+                    <tr>
+                      <td className="px-4 py-8 text-center" colSpan={5}>
+                        <div className="flex justify-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : rows.length === 0 ? (
                     <tr>
                       <td className="px-4 py-8 text-center text-slate-400" colSpan={5}>No data</td>
                     </tr>

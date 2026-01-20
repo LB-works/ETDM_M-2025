@@ -12,6 +12,7 @@ const FleetOverview = ({ user, setUser }) => {
   const [bypassAlertsToday, setBypassAlertsToday] = useState(0);
   const [bypassHistory, setBypassHistory] = useState({});
   const [processedAlerts, setProcessedAlerts] = useState(new Set());
+  const [loadingHistory, setLoadingHistory] = useState(true);
 
   useEffect(() => {
     // Listen to all meters
@@ -66,6 +67,7 @@ const FleetOverview = ({ user, setUser }) => {
   // Fetch today's bypass alerts from history
   useEffect(() => {
     const fetchBypassHistory = async () => {
+      setLoadingHistory(true);
       try {
         const metersSnapshot = await get(ref(db, 'meters'));
         if (!metersSnapshot.exists()) return;
@@ -115,6 +117,8 @@ const FleetOverview = ({ user, setUser }) => {
         setBypassHistory(bypassLog);
       } catch (error) {
         console.error('Error fetching bypass history:', error);
+      } finally {
+        setLoadingHistory(false);
       }
     };
 

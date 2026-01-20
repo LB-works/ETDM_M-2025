@@ -9,6 +9,7 @@ const AlertsNotifications = ({ user, setUser }) => {
   const [alerts, setAlerts] = useState([]);
   const [groupedAlerts, setGroupedAlerts] = useState({});
   const [expandedDays, setExpandedDays] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPair = async () => {
@@ -28,7 +29,7 @@ const AlertsNotifications = ({ user, setUser }) => {
     const histRef = ref(db, `meters/${pairId}/client/history`);
     const histQuery = query(histRef, orderByKey(), limitToLast(500));
     const unsub = onValue(histQuery, (snap) => {
-      if (!snap.exists()) { setAlerts([]); return; }
+      if (!snap.exists()) { setAlerts([]); setLoading(false); return; }
       const data = snap.val();
       const items = Object.keys(data).map((ts) => ({ ts, ...data[ts] }));
       // Filter only theft detected entries (bypass detection)
@@ -50,6 +51,7 @@ const AlertsNotifications = ({ user, setUser }) => {
       // Auto-expand today's alerts
       const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
       setExpandedDays({ [today]: true });
+      setLoading(false);
     });
     return () => off(histRef);
   }, [pairId]);
@@ -110,7 +112,14 @@ const AlertsNotifications = ({ user, setUser }) => {
               </button>
             </div>
 
-            {Object.keys(groupedAlerts).length === 0 ? (
+            {loading ? (
+              <div className="rounded-xl border border-gray-200/10 dark:border-[#3b5454] p-12 text-center text-slate-400">
+                <div className="flex justify-center mb-4">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                </div>
+                <p>Loading alerts...</p>
+              </div>
+            ) : Object.keys(groupedAlerts).length === 0 ? (
               <div className="rounded-xl border border-gray-200/10 dark:border-[#3b5454] p-12 text-center text-slate-400">
                 <span className="material-symbols-outlined text-6xl mb-4 block">notifications_off</span>
                 <p>No alerts found</p>
