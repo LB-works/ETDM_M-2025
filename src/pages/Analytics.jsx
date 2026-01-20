@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ref, get } from 'firebase/database';
+import { ref, get, query, orderByKey, limitToLast } from 'firebase/database';
 import { db } from '../utils/firebaseConfig';
 import { calculateCost } from '../utils/dataParser';
 import Sidebar from '../components/Sidebar';
@@ -58,11 +58,16 @@ const Analytics = ({ user, setUser }) => {
         const riskProfiles = [];
         const bypassEventsByDay = {};
         
-        // Process each meter
-        meterPairs.forEach(pairId => {
+        // Process each meter (optimize: fetch history separately with limits)
+        for (const pairId of meterPairs) {
           const client = metersData[pairId]?.client?.live_data;
           const pole = metersData[pairId]?.pole?.live_data;
-          const history = metersData[pairId]?.client?.history;
+          
+          // Optimize: Fetch only last 100 history records per meter
+          const historyRef = ref(db, `meters/${pairId}/client/history`);
+          const historyQuery = query(historyRef, orderByKey(), limitToLast(100));
+          const historySnapshot = await get(historyQuery);
+          const history = historySnapshot.exists() ? historySnapshot.val() : null;
           
           if (client) {
             const clientEnergy = client.energy || 0;

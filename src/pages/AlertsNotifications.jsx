@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import { db } from '../utils/firebaseConfig';
-import { ref, onValue, off, get } from 'firebase/database';
+import { ref, onValue, off, get, query, orderByKey, limitToLast } from 'firebase/database';
 
 const AlertsNotifications = ({ user, setUser }) => {
   const [pairId, setPairId] = useState('');
@@ -24,9 +24,10 @@ const AlertsNotifications = ({ user, setUser }) => {
 
   useEffect(() => {
     if (!pairId) return;
-    // Show all bypass detections (no hourly filtering for alerts)
+    // Optimize: Only fetch last 500 records for alerts (covers ~2 weeks of data)
     const histRef = ref(db, `meters/${pairId}/client/history`);
-    const unsub = onValue(histRef, (snap) => {
+    const histQuery = query(histRef, orderByKey(), limitToLast(500));
+    const unsub = onValue(histQuery, (snap) => {
       if (!snap.exists()) { setAlerts([]); return; }
       const data = snap.val();
       const items = Object.keys(data).map((ts) => ({ ts, ...data[ts] }));

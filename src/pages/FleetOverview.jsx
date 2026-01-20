@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ref, onValue, off, get } from 'firebase/database';
+import { ref, onValue, off, get, query, orderByKey, limitToLast } from 'firebase/database';
 import { db } from '../utils/firebaseConfig';
 import { extractMeterPairs } from '../utils/dataParser';
 import { sendBypassAlertEmail } from '../services/emailService';
@@ -79,11 +79,15 @@ const FleetOverview = ({ user, setUser }) => {
         today.setHours(0, 0, 0, 0);
         const todayTimestamp = Math.floor(today.getTime() / 1000);
 
-        // Loop through each meter pair
+        // Loop through each meter pair (optimize: only fetch recent history)
         for (const pairId of Object.keys(metersData)) {
-          const clientHistory = metersData[pairId]?.client?.history;
+          // Optimize: Fetch only last 100 history records instead of all
+          const historyRef = ref(db, `meters/${pairId}/client/history`);
+          const historyQuery = query(historyRef, orderByKey(), limitToLast(100));
+          const historySnapshot = await get(historyQuery);
           
-          if (clientHistory) {
+          if (historySnapshot.exists()) {
+            const clientHistory = historySnapshot.val();
             const bypassEvents = [];
             
             // Check each history entry

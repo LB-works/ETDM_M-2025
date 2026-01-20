@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ref, onValue, off, get } from 'firebase/database';
+import { ref, onValue, off, get, query, orderByKey, limitToLast } from 'firebase/database';
 import { db } from '../utils/firebaseConfig';
 import {
   formatPower, formatVoltage, formatCurrent, formatEnergy,
@@ -43,8 +43,10 @@ const CustomerDashboard = ({ user, setUser }) => {
 
     const fetchHistoricalData = async () => {
       try {
+        // Optimize: Only fetch last 200 records instead of all history
         const historyRef = ref(db, `meters/${pairId}/client/history`);
-        const snapshot = await get(historyRef);
+        const historyQuery = query(historyRef, orderByKey(), limitToLast(200));
+        const snapshot = await get(historyQuery);
 
         if (snapshot.exists()) {
           const allData = [];

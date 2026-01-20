@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import { db } from '../utils/firebaseConfig';
-import { ref, onValue, off, get } from 'firebase/database';
+import { ref, onValue, off, get, query, orderByKey, limitToLast } from 'firebase/database';
 
 const UsageHistory = ({ user, setUser }) => {
   const [pairId, setPairId] = useState('');
@@ -21,9 +21,10 @@ const UsageHistory = ({ user, setUser }) => {
   }, [user?.email]);
 
   useEffect(() => {
-    if (!pairId) return;
+    // Optimize: Only fetch last 200 records (covers ~8 days of hourly data)
     const histRef = ref(db, `meters/${pairId}/client/history`);
-    const unsub = onValue(histRef, (snap) => {
+    const histQuery = query(histRef, orderByKey(), limitToLast(200));
+    const unsub = onValue(histQuery, (snap) => {
       if (!snap.exists()) { setRows([]); return; }
       const data = snap.val();
       
