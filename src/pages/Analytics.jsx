@@ -115,7 +115,7 @@ const Analytics = ({ user, setUser }) => {
               }
             }
           }
-        });
+        }
         
         // Set summary metrics
         setTotalEnergy(totalEnergySum);
