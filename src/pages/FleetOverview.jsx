@@ -13,6 +13,7 @@ const FleetOverview = ({ user, setUser }) => {
   const [bypassHistory, setBypassHistory] = useState({});
   const [processedAlerts, setProcessedAlerts] = useState(new Set());
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [loadingMeters, setLoadingMeters] = useState(true);
 
   useEffect(() => {
     // Listen to all meters
@@ -21,6 +22,7 @@ const FleetOverview = ({ user, setUser }) => {
     const unsubscribe = onValue(metersRef, (snapshot) => {
       const pairs = extractMeterPairs(snapshot);
       setMeters(pairs);
+      setLoadingMeters(false);
       
       // Check for new bypass alerts and send emails
       pairs.forEach(async (meter) => {
@@ -218,7 +220,14 @@ const FleetOverview = ({ user, setUser }) => {
 
             {/* Meter Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredMeters.length === 0 ? (
+              {loadingMeters ? (
+                 <div className="col-span-full flex justify-center py-20">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                      <p className="text-slate-400">Loading fleet data...</p>
+                    </div>
+                 </div>
+              ) : filteredMeters.length === 0 ? (
                 <div className="col-span-full text-center py-12 text-slate-400">
                   <span className="material-symbols-outlined text-6xl mb-4">devices</span>
                   <p>No meters found. Meters will appear here when data is available.</p>

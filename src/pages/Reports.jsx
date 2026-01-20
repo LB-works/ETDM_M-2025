@@ -7,9 +7,9 @@ import Navbar from '../components/Navbar';
 
 const Reports = ({ user, setUser }) => {
   const [bypassLogs, setBypassLogs] = useState([]);
-  const [allBypassHistory, setAllBypassHistory] = useState([]);
   const [groupedBypassHistory, setGroupedBypassHistory] = useState({});
   const [expandedDays, setExpandedDays] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const metersRef = ref(db, 'meters');
@@ -41,6 +41,7 @@ const Reports = ({ user, setUser }) => {
   // Fetch ALL historical bypass events
   useEffect(() => {
     const fetchAllBypassHistory = async () => {
+      setLoading(true);
       try {
         const metersSnapshot = await get(ref(db, 'meters'));
         if (!metersSnapshot.exists()) return;
@@ -93,6 +94,8 @@ const Reports = ({ user, setUser }) => {
         setExpandedDays({ [today]: true });
       } catch (error) {
         console.error('Error fetching bypass history:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -213,7 +216,14 @@ const Reports = ({ user, setUser }) => {
             )}
 
             {/* Historical Bypass Events - Grouped by Day */}
-            {Object.keys(groupedBypassHistory).length > 0 ? (
+            {loading ? (
+              <div className="rounded-xl border border-white/10 bg-white/5 p-12 text-center text-slate-400">
+                <div className="flex justify-center mb-4">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                </div>
+                <p>Loading logs...</p>
+              </div>
+            ) : Object.keys(groupedBypassHistory).length > 0 ? (
               <div className="space-y-4">
                 <h2 className="text-white text-2xl font-bold">Historical Bypass Events</h2>
                 {Object.keys(groupedBypassHistory).sort((a, b) => new Date(b) - new Date(a)).map((day) => (

@@ -20,6 +20,7 @@ const CustomerDashboard = ({ user, setUser }) => {
   const [lastUpdateTime, setLastUpdateTime] = useState(Date.now());
   const [isDeviceActive, setIsDeviceActive] = useState(true);
   const [processedAlerts, setProcessedAlerts] = useState(new Set());
+  const [loadingHistory, setLoadingHistory] = useState(true);
 
   // Resolve pairId for this customer from mapping
   useEffect(() => {
@@ -42,6 +43,7 @@ const CustomerDashboard = ({ user, setUser }) => {
     if (!pairId) return;
 
     const fetchHistoricalData = async () => {
+      setLoadingHistory(true);
       try {
         // Optimize: Only fetch last 200 records instead of all history
         const historyRef = ref(db, `meters/${pairId}/client/history`);
@@ -117,6 +119,8 @@ const CustomerDashboard = ({ user, setUser }) => {
       } catch (error) {
         console.error('Error fetching historical data:', error);
         setHistoricalData([]);
+      } finally {
+        setLoadingHistory(false);
       }
     };
 
@@ -393,7 +397,16 @@ const CustomerDashboard = ({ user, setUser }) => {
                 </div>
 
                 <div className="px-2 py-4">
-                  <EnergyChart data={chartData} period={period} />
+                  {loadingHistory ? (
+                    <div className="flex h-[300px] items-center justify-center">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        <p className="text-sm text-slate-400">Loading history...</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <EnergyChart data={chartData} period={period} />
+                  )}
                 </div>
               </div>
 

@@ -13,6 +13,7 @@ const CustomerManagement = ({ user, setUser }) => {
   const [registered, setRegistered] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const metersRef = ref(db, 'meters');
@@ -20,6 +21,7 @@ const CustomerManagement = ({ user, setUser }) => {
     const unsubscribe = onValue(metersRef, (snapshot) => {
       const pairs = extractMeterPairs(snapshot);
       setCustomers(pairs);
+      setLoading(false);
     });
 
     return () => {
@@ -166,7 +168,16 @@ const CustomerManagement = ({ user, setUser }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredCustomers.length === 0 ? (
+                  {loading ? (
+                    <tr>
+                      <td colSpan="7" className="px-6 py-12 text-center text-slate-400">
+                        <div className="flex justify-center mb-4">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                        </div>
+                        <p>Loading customers...</p>
+                      </td>
+                    </tr>
+                  ) : filteredCustomers.length === 0 ? (
                     <tr>
                       <td colSpan="7" className="px-6 py-12 text-center text-slate-400">
                         No customers found
